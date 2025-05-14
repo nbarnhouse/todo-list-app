@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "to-do-list",
-    "slug": "to-do-list",
+    "name": "to_do_app",
+    "slug": "to_do_app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "todolist",
+    "scheme": "todoapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
