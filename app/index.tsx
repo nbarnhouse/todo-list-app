@@ -1,6 +1,8 @@
 import {
   FlatList,
   Image,
+  KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -9,54 +11,73 @@ import {
   View,
 } from "react-native";
 
-import { todoData } from "@/constants/list_data";
-
-import iconImage from "@/assets/images/user-icon.png";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
+import iconImage from "@/assets/images/user-icon.png";
+import { todoData } from "@/constants/list_data";
+
 export default function Index() {
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => {
-            alert("clicked!");
-          }}
-        >
-          <Ionicons name="menu" size={30} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Image
-            source={iconImage}
-            style={{
-              height: 50,
-              width: 50,
-              borderRadius: 25,
-              borderColor: "white",
-              borderWidth: 0,
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => {
+              alert("clicked!");
             }}
-          ></Image>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.searchBar}>
-        <Feather name="search" size={24} color="black" />
-        <TextInput
-          placeholder="search"
-          style={styles.searchInput}
-          clearButtonMode="always"
+            activeOpacity={0} //default is .2 which reduces by 80%
+          >
+            <Ionicons name="menu" size={30} color="black" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Image
+              source={iconImage}
+              style={{
+                height: 50,
+                width: 50,
+                borderRadius: 25,
+                borderColor: "white",
+                borderWidth: 0,
+              }}
+            ></Image>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.searchBar}>
+          <Feather name="search" size={24} color="black" />
+          <TextInput
+            placeholder="search"
+            style={styles.searchInput}
+            clearButtonMode="always"
+          />
+        </View>
+        <FlatList
+          data={todoData}
+          renderItem={({ item }) => (
+            <View style={styles.todoItem}>
+              <Text style={styles.todoTitle}>{item.title}</Text>
+              <Text style={styles.todoStatus}>
+                {item.isDone ? "✅ Completed" : "🕓 Pending"}
+              </Text>
+            </View>
+          )}
+          keyExtractor={(item) => item.id.toString()}
         />
-      </View>
-      <FlatList
-        data={todoData}
-        renderItem={({ item }) => (
-          <Text style={styles.todoItem}>
-            {item.id} - {item.title}
-          </Text>
-        )}
-        keyExtractor={(item) => item.id.toString()}
-      />
-    </SafeAreaView>
+        <View style={styles.footer}>
+          <TextInput
+            placeholder="Add to do item"
+            style={styles.newToDoInput}
+            clearButtonMode="always"
+          />
+          <TouchableOpacity onPress={() => {}} style={styles.addButton}>
+            <Ionicons name="add" size={32} color="black" />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -84,6 +105,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   todoItem: {
+    flex: 1,
     backgroundColor: "white",
     padding: 16,
     marginVertical: 8,
@@ -91,4 +113,32 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: "#6200ee", // purple accent
   },
+  todoTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  todoDescription: {
+    fontSize: 14,
+    color: "#555",
+  },
+  todoStatus: {
+    marginTop: 6,
+    fontStyle: "italic",
+    color: "#888",
+  },
+  footer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  newToDoInput: {
+    flex: 1,
+    fontSize: 16,
+    backgroundColor: "white",
+    padding: 16,
+    borderRadius: 10,
+  },
+
+  addButton: { padding: 8, borderRadius: 10 },
 });

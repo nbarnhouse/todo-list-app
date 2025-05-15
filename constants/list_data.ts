@@ -17,7 +17,7 @@ export const todoData = [
   {
     id: 4,
     title: "Todo 4",
-    isDone: false,
+    isDone: true,
   },
   {
     id: 5,
