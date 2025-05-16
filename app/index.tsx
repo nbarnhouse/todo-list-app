@@ -91,13 +91,13 @@ export default function Index() {
 
   //Delete todo helper function
   const deleteTodo = (id: number) => {
-    //alert("Delete pushed");
+    alert("Delete pushed");
     const updatedTodos = todos.filter((todo) => todo.id !== id);
     setTodos(updatedTodos);
   };
 
   const searchFunction = () => {
-    alert("search clicked!");
+    //alert("search clicked!");
     //const filteredTodos = todos.filter(todo) =>todo.title.toLower
   };
 
