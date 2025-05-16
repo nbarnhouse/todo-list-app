@@ -1,3 +1,9 @@
+export type ToDoType = {
+  id: number;
+  title: string;
+  isDone: boolean;
+};
+
 export const todoData = [
   {
     id: 1,
@@ -22,6 +28,6 @@ export const todoData = [
   {
     id: 5,
     title: "Todo 5",
-    isDone: false,
+    isDone: true,
   },
 ];
