@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -14,9 +15,10 @@ import {
 
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import iconImage from "@/assets/images/user-icon.png";
-import { todoData, ToDoType } from "@/constants/list_data";
+import { ToDoType } from "@/constants/list_data";
 
 export default function Index() {
   // const router = useRouter();
@@ -26,32 +28,46 @@ export default function Index() {
   //   onPress={() => router.push("/test")} // Navigate to the Test screen
   // />
 
-  const [todos, setTodos] = useState<ToDoType[]>(todoData);
+  const [todos, setTodos] = useState<ToDoType[]>([]);
   const [isDone, setIsDone] = useState<boolean>(false);
+  const [allTodos, setAllTodos] = useState<ToDoType[]>([]);
   const [todoText, setTodoText] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     //console.log(`todos Array:`, JSON.stringify(todos));
     //console.log(`todoText Array:`, JSON.stringify(todoText));
+    const getTodos = async () => {
+      try {
+        const todos = await AsyncStorage.getItem("my-todo");
+        if (todos !== null) {
+          //setTodos(JSON.parse(todos));
+          const parsedTodos = JSON.parse(todos);
+          setAllTodos(parsedTodos);
+          setTodos(parsedTodos);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getTodos();
   }, []);
 
   // ToDoItem is the flat list (renderitem) component
-  const ToDoItem = ({ todo }: { todo: ToDoType }) => (
+  const ToDoItem = ({
+    todo,
+    deleteTodo,
+  }: {
+    todo: ToDoType;
+    deleteTodo: (id: number) => void;
+  }) => (
     <View style={styles.todoItem}>
-      <TouchableOpacity
-        onPress={() => {
-          setIsDone(!isDone);
-          console.log("isDone State", JSON.stringify(isDone));
-        }}
-      >
-        <Text style={styles.todoStatus}>
-          {todo.isDone ? (
-            <Feather name="check-circle" size={24} color="black" />
-          ) : (
-            <Feather name="circle" size={24} color="black" />
-          )}
-        </Text>
+      <TouchableOpacity onPress={() => toggleDone(todo.id)}>
+        {todo.isDone ? (
+          <Feather name="check-circle" size={24} color="black" />
+        ) : (
+          <Feather name="circle" size={24} color="black" />
+        )}
       </TouchableOpacity>
       <Text
         style={[
@@ -73,32 +89,57 @@ export default function Index() {
   );
 
   //Add todo helper function
-  const addTodo = () => {
-    const newTodo = {
-      id: Math.random(),
-      title: todoText,
-      isDone: false,
-    };
+  const addTodo = async () => {
+    try {
+      const newTodo = {
+        id: Math.random(),
+        title: todoText,
+        isDone: false,
+      };
 
-    if (todoText.trim() === "") {
-      alert("Please enter a task!");
-    } else {
-      todos.push(newTodo);
-      setTodos(todos);
-      setTodoText("");
+      if (todoText.trim() === "") {
+        alert("Please enter a task!");
+      } else {
+        // todos.push(newTodo);
+        // setTodos(todos);
+        setTodos((prevTodos) => [...prevTodos, newTodo]);
+        Keyboard.dismiss();
+        await AsyncStorage.setItem("my-todo", JSON.stringify(todos));
+        setTodoText("");
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
   //Delete todo helper function
-  const deleteTodo = (id: number) => {
-    alert("Delete pushed");
-    const updatedTodos = todos.filter((todo) => todo.id !== id);
-    setTodos(updatedTodos);
+  const deleteTodo = async (id: number) => {
+    try {
+      //alert("Delete pushed");
+      const updatedTodos = todos.filter((todo) => todo.id !== id);
+      await AsyncStorage.setItem("my-todo", JSON.stringify(updatedTodos));
+      setTodos(updatedTodos);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
+  //Toggle isDone helper function
+  const toggleDone = (id: number) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === id ? { ...todo, isDone: !todo.isDone } : todo
+      )
+    );
+  };
+
+  //Search helper function
   const searchFunction = () => {
     //alert("search clicked!");
-    //const filteredTodos = todos.filter(todo) =>todo.title.toLower
+    const filteredTodos = allTodos.filter((todo) =>
+      todo.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setTodos(filteredTodos);
   };
 
   return (
@@ -135,15 +176,17 @@ export default function Index() {
           style={styles.searchInput}
           clearButtonMode="always"
           value={searchQuery}
-          //onChangeText={setSearchQuery}
-          //onSubmitEditing={searchFunction}
+          onChangeText={setSearchQuery}
+          onSubmitEditing={searchFunction}
         />
       </View>
 
       <FlatList
-        data={todos}
+        data={[...todos].reverse()}
         //pulling data from todos state instead of directly from the toDoData list
-        renderItem={({ item }) => <ToDoItem todo={item} />}
+        renderItem={({ item }) => (
+          <ToDoItem todo={item} deleteTodo={deleteTodo} />
+        )}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
       />
@@ -180,6 +223,7 @@ export default function Index() {
             // console.log(`todoText after add button item to list: ${todoText}`);
           }}
           style={styles.addButton}
+          accessible={true}
         >
           <Ionicons name="add" size={32} color="black" />
         </TouchableOpacity>
@@ -230,11 +274,6 @@ const styles = StyleSheet.create({
   todoDescription: {
     fontSize: 14,
     color: "#555",
-  },
-  todoStatus: {
-    marginTop: 6,
-    fontStyle: "italic",
-    color: "#888",
   },
   footer: {
     flexDirection: "row",
