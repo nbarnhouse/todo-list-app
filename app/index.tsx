@@ -61,31 +61,45 @@ export default function Index() {
       >
         {todo.title}
       </Text>
-      <TouchableOpacity onPress={deleteTodo}>
+      <TouchableOpacity
+        onPress={() => {
+          deleteTodo(todo.id);
+        }}
+      >
         <Feather name="delete" size={24} color="black" />
       </TouchableOpacity>
       {/* <Ionicons name="pencil-sharp" size={24} color="black" /> */}
     </View>
   );
 
+  //Add todo helper function
   const addTodo = () => {
     const newTodo = {
       id: Math.random(),
       title: todoText,
       isDone: false,
     };
-    todos.push(newTodo);
-    setTodos(todos);
-    setTodoText("");
+
+    if (todoText.trim() === "") {
+      alert("Please enter a task!");
+    } else {
+      todos.push(newTodo);
+      setTodos(todos);
+      setTodoText("");
+    }
   };
 
-  const deleteTodo = () => {
-    alert("Delete pushed");
+  //Delete todo helper function
+  const deleteTodo = (id: number) => {
+    //alert("Delete pushed");
+    const updatedTodos = todos.filter((todo) => todo.id !== id);
+    setTodos(updatedTodos);
   };
 
-  // const searchFunction = (query: string) => {
-  //   const filteredTodos = todos.filter(todo) =>todo.title.toLower
-  // };
+  const searchFunction = () => {
+    alert("search clicked!");
+    //const filteredTodos = todos.filter(todo) =>todo.title.toLower
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -120,9 +134,9 @@ export default function Index() {
           placeholder="search"
           style={styles.searchInput}
           clearButtonMode="always"
-          onSubmitEditing={() => {
-            alert("enter pressed");
-          }}
+          value={searchQuery}
+          //onChangeText={setSearchQuery}
+          //onSubmitEditing={searchFunction}
         />
       </View>
 
@@ -131,6 +145,7 @@ export default function Index() {
         //pulling data from todos state instead of directly from the toDoData list
         renderItem={({ item }) => <ToDoItem todo={item} />}
         keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
       />
 
       <KeyboardAvoidingView
