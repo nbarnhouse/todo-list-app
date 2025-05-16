@@ -97,7 +97,7 @@ export default function Index() {
   };
 
   const searchFunction = () => {
-    alert("search clicked!");
+    //alert("search clicked!");
     //const filteredTodos = todos.filter(todo) =>todo.title.toLower
   };
 
