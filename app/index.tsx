@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
@@ -19,18 +19,40 @@ import iconImage from "@/assets/images/user-icon.png";
 import { todoData, ToDoType } from "@/constants/list_data";
 
 export default function Index() {
+  // const router = useRouter();
+  // To add button back in, move this to the return statement
+  //   <Button
+  //   title="Go to Test Screen"
+  //   onPress={() => router.push("/test")} // Navigate to the Test screen
+  // />
+
   const [todos, setTodos] = useState<ToDoType[]>(todoData);
+  const [isDone, setIsDone] = useState<boolean>(false);
+  const [todoText, setTodoText] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  useEffect(() => {
+    //console.log(`todos Array:`, JSON.stringify(todos));
+    //console.log(`todoText Array:`, JSON.stringify(todoText));
+  }, []);
+
+  // ToDoItem is the flat list (renderitem) component
   const ToDoItem = ({ todo }: { todo: ToDoType }) => (
     <View style={styles.todoItem}>
-      <Text style={styles.todoStatus}>
-        {todo.isDone ? (
-          <Feather name="check-circle" size={24} color="black" />
-        ) : (
-          <Feather name="circle" size={24} color="black" />
-        )}
-      </Text>
+      <TouchableOpacity
+        onPress={() => {
+          setIsDone(!isDone);
+          console.log("isDone State", JSON.stringify(isDone));
+        }}
+      >
+        <Text style={styles.todoStatus}>
+          {todo.isDone ? (
+            <Feather name="check-circle" size={24} color="black" />
+          ) : (
+            <Feather name="circle" size={24} color="black" />
+          )}
+        </Text>
+      </TouchableOpacity>
       <Text
         style={[
           styles.todoTitle,
@@ -39,16 +61,27 @@ export default function Index() {
       >
         {todo.title}
       </Text>
-      <TouchableOpacity
-        onPress={() => {
-          alert(`Delete ${todo.title}`);
-        }}
-      >
+      <TouchableOpacity onPress={deleteTodo}>
         <Feather name="delete" size={24} color="black" />
       </TouchableOpacity>
       {/* <Ionicons name="pencil-sharp" size={24} color="black" /> */}
     </View>
   );
+
+  const addTodo = () => {
+    const newTodo = {
+      id: Math.random(),
+      title: todoText,
+      isDone: false,
+    };
+    todos.push(newTodo);
+    setTodos(todos);
+    setTodoText("");
+  };
+
+  const deleteTodo = () => {
+    alert("Delete pushed");
+  };
 
   // const searchFunction = (query: string) => {
   //   const filteredTodos = todos.filter(todo) =>todo.title.toLower
@@ -65,6 +98,8 @@ export default function Index() {
         >
           <Ionicons name="menu" size={30} color="black" />
         </TouchableOpacity>
+
+        {/* user icon with button */}
         <TouchableOpacity>
           <Image
             source={iconImage}
@@ -78,30 +113,59 @@ export default function Index() {
           ></Image>
         </TouchableOpacity>
       </View>
+      {/* search bar with button */}
       <View style={styles.searchBar}>
         <Feather name="search" size={24} color="black" />
         <TextInput
           placeholder="search"
           style={styles.searchInput}
           clearButtonMode="always"
+          onSubmitEditing={() => {
+            alert("enter pressed");
+          }}
         />
       </View>
+
       <FlatList
         data={todos}
+        //pulling data from todos state instead of directly from the toDoData list
         renderItem={({ item }) => <ToDoItem todo={item} />}
         keyExtractor={(item) => item.id.toString()}
       />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={10}
         style={styles.footer}
       >
+        {/* Text Input field for adding items */}
         <TextInput
+          value={todoText}
+          onChangeText={(text) => {
+            setTodoText(text);
+            // console.log(
+            //   `todoText after add textChange in input field: ${todoText}`
+            // );
+          }}
           placeholder="Add to do item"
           style={styles.newToDoInput}
           clearButtonMode="always"
+          autoCorrect={false}
+          autoCapitalize="sentences"
+          onSubmitEditing={() => {
+            addTodo();
+          }}
         />
-        <TouchableOpacity onPress={() => {}} style={styles.addButton}>
+
+        {/* Plus button to add new item to list */}
+        <TouchableOpacity
+          onPress={() => {
+            addTodo();
+            //alert(todoText);
+            // console.log(`todoText after add button item to list: ${todoText}`);
+          }}
+          style={styles.addButton}
+        >
           <Ionicons name="add" size={32} color="black" />
         </TouchableOpacity>
       </KeyboardAvoidingView>
