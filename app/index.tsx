@@ -91,7 +91,7 @@ export default function Index() {
 
   //Delete todo helper function
   const deleteTodo = (id: number) => {
-    //alert("Delete pushed");
+    alert("Delete pushed");
     const updatedTodos = todos.filter((todo) => todo.id !== id);
     setTodos(updatedTodos);
   };
