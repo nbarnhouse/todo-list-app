@@ -3,15 +3,18 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
 SplashScreen.preventAutoHideAsync();
+SplashScreen.hideAsync();
 //setTimeout(SplashScreen.hideAsync, 1000);
 
 export default function RootLayout() {
   useEffect(() => {
-    const prepare = async () => {
-      // await any async loading here (fonts, data)
+    const load = async () => {
+      // Example async loading task
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await SplashScreen.hideAsync();
     };
-    prepare();
+
+    load();
   }, []);
 
   return (
