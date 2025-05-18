@@ -28,6 +28,7 @@ This is a basic To-Do List app built with React Native, designed to help users m
 - brew install node
 - brew install watchman
 - npx expo install @react-native-async-storage/async-storage
+- npx expo install expo-splash-screen
 
 ## File Structure
 
