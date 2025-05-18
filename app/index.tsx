@@ -167,7 +167,7 @@ export default function Index() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, {}]}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => {
@@ -268,12 +268,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
+    marginTop: Platform.OS === "ios" ? 0 : 30,
     alignItems: "center",
   },
   searchBar: {
     backgroundColor: "white",
+    alignItems: "center",
     flexDirection: "row",
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === "ios" ? 16 : 8,
+
     borderRadius: 10,
     gap: 10,
     marginBottom: 16,
@@ -307,6 +311,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginTop: 10,
+    marginBottom: Platform.OS === "ios" ? 0 : 30,
   },
   newToDoInput: {
     flex: 1,
