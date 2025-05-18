@@ -29,40 +29,48 @@ export default function Index() {
   // />
 
   const [todos, setTodos] = useState<ToDoType[]>([]);
-  const [isDone, setIsDone] = useState<boolean>(false);
-  const [allTodos, setAllTodos] = useState<ToDoType[]>([]);
   const [todoText, setTodoText] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [oldTodos, setOldTodos] = useState<ToDoType[]>([]);
 
+  //useEffect for main app
   useEffect(() => {
-    //console.log(`todos Array:`, JSON.stringify(todos));
-    //console.log(`todoText Array:`, JSON.stringify(todoText));
+    // Fetch todos from AsyncStorage when the component mounts
     const getTodos = async () => {
       try {
         const todos = await AsyncStorage.getItem("my-todo");
         if (todos !== null) {
-          //setTodos(JSON.parse(todos));
           const parsedTodos = JSON.parse(todos);
-          setAllTodos(parsedTodos);
           setTodos(parsedTodos);
+          setOldTodos(parsedTodos); // Set the original todos for searching
         }
       } catch (error) {
         console.log(error);
       }
     };
+
     getTodos();
   }, []);
+
+  //useEffect for search function
+  useEffect(() => {
+    if (oldTodos.length > 0) {
+      onSearch(searchQuery);
+    }
+  }, [searchQuery, oldTodos]);
 
   // ToDoItem is the flat list (renderitem) component
   const ToDoItem = ({
     todo,
     deleteTodo,
+    handleTodo,
   }: {
     todo: ToDoType;
     deleteTodo: (id: number) => void;
+    handleTodo: (id: number) => void;
   }) => (
     <View style={styles.todoItem}>
-      <TouchableOpacity onPress={() => toggleDone(todo.id)}>
+      <TouchableOpacity onPress={() => handleTodo(todo.id)}>
         {todo.isDone ? (
           <Feather name="check-circle" size={24} color="black" />
         ) : (
@@ -100,9 +108,9 @@ export default function Index() {
       if (todoText.trim() === "") {
         alert("Please enter a task!");
       } else {
-        // todos.push(newTodo);
-        // setTodos(todos);
-        setTodos((prevTodos) => [...prevTodos, newTodo]);
+        todos.push(newTodo);
+        setTodos(todos);
+        setOldTodos(todos);
         Keyboard.dismiss();
         await AsyncStorage.setItem("my-todo", JSON.stringify(todos));
         setTodoText("");
@@ -116,30 +124,46 @@ export default function Index() {
   const deleteTodo = async (id: number) => {
     try {
       //alert("Delete pushed");
-      const updatedTodos = todos.filter((todo) => todo.id !== id);
-      await AsyncStorage.setItem("my-todo", JSON.stringify(updatedTodos));
-      setTodos(updatedTodos);
+      const newTodos = todos.filter((todo) => todo.id !== id);
+      await AsyncStorage.setItem("my-todo", JSON.stringify(newTodos));
+      setTodos(newTodos);
+      setOldTodos(newTodos);
     } catch (error) {
       console.log(error);
     }
   };
 
   //Toggle isDone helper function
-  const toggleDone = (id: number) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) =>
-        todo.id === id ? { ...todo, isDone: !todo.isDone } : todo
-      )
-    );
+  const handleTodo = async (id: number) => {
+    try {
+      const newTodos = todos.map((todo) => {
+        if (todo.id === id) {
+          todo.isDone = !todo.isDone;
+        }
+        return todo;
+      });
+      await AsyncStorage.setItem("my-todo", JSON.stringify(newTodos));
+      setTodos(newTodos);
+      setOldTodos(newTodos);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   //Search helper function
-  const searchFunction = () => {
-    //alert("search clicked!");
-    const filteredTodos = allTodos.filter((todo) =>
-      todo.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setTodos(filteredTodos);
+  const onSearch = (query: string) => {
+    if (query == "") {
+      if (todos !== oldTodos) {
+        setTodos(oldTodos);
+      }
+    } else {
+      const filteredTodos = todos.filter((todo) =>
+        todo.title.toLowerCase().includes(query.toLowerCase())
+      );
+      if (filteredTodos.length !== todos.length) {
+        setTodos(filteredTodos);
+      }
+    }
   };
 
   return (
@@ -174,10 +198,9 @@ export default function Index() {
         <TextInput
           placeholder="search"
           style={styles.searchInput}
-          clearButtonMode="always"
           value={searchQuery}
-          onChangeText={setSearchQuery}
-          onSubmitEditing={searchFunction}
+          onChangeText={(text) => setSearchQuery(text)}
+          clearButtonMode="always"
         />
       </View>
 
@@ -185,7 +208,11 @@ export default function Index() {
         data={[...todos].reverse()}
         //pulling data from todos state instead of directly from the toDoData list
         renderItem={({ item }) => (
-          <ToDoItem todo={item} deleteTodo={deleteTodo} />
+          <ToDoItem
+            todo={item}
+            deleteTodo={deleteTodo}
+            handleTodo={handleTodo}
+          />
         )}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
@@ -240,7 +267,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: 10,
     alignItems: "center",
   },
   searchBar: {
@@ -279,6 +306,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    marginTop: 10,
   },
   newToDoInput: {
     flex: 1,
