@@ -4,11 +4,11 @@
 
 This is a basic To-Do List app built with React Native, designed to help users manage tasks efficiently. The app allows users to:
 
-Add new tasks: Enter task descriptions and save them to the list.
-Search for tasks: Quickly find tasks by typing in the search bar.
-Mark tasks as complete: Tap on tasks to toggle their completion status (checked/un-checked).
-Delete tasks: Remove tasks from the list with a simple click of a delete icon.
-Persistent data storage: All tasks are saved using AsyncStorage, ensuring that your list persists even after app restarts.
+- Add new tasks: Enter task descriptions and save them to the list.
+- Search for tasks: Quickly find tasks by typing in the search bar.
+- Mark tasks as complete: Tap on tasks to toggle their completion status (checked/un-checked).
+- Delete tasks: Remove tasks from the list with a simple click of a delete icon.
+- Persistent data storage: All tasks are saved using AsyncStorage, ensuring that your list persists even after app restarts.
 
 ### Prerequisites
 

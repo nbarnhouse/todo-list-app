@@ -21,13 +21,6 @@ import iconImage from "@/assets/images/user-icon.png";
 import { ToDoType } from "@/constants/list_data";
 
 export default function Index() {
-  // const router = useRouter();
-  // To add button back in, move this to the return statement
-  //   <Button
-  //   title="Go to Test Screen"
-  //   onPress={() => router.push("/test")} // Navigate to the Test screen
-  // />
-
   const [todos, setTodos] = useState<ToDoType[]>([]);
   const [todoText, setTodoText] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
